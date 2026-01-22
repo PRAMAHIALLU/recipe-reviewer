@@ -1,11 +1,12 @@
 .app-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 15px 30px;
   background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .app-header h1 {
@@ -13,4 +14,50 @@
   font-weight: bold;
   margin: 0;
   text-align: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.left-logo {
+  justify-content: flex-start;
+}
+
+.right-logo {
+  justify-content: flex-end;
+}
+
+.logo-image {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  transition: all 0.3s ease;
+}
+
+.left-logo .logo-image {
+  /* Etch Systems logo - keep original colors */
+  filter: none;
+}
+
+.right-logo .logo-image {
+  /* IMI logo - make it white */
+  filter: brightness(0) invert(1);
+}
+
+.logo-image:hover {
+  transform: scale(1.05);
+}
+
+.left-logo .logo-image:hover {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.right-logo .logo-image:hover {
+  filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(255,255,255,0.3));
 }

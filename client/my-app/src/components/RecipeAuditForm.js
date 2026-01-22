@@ -265,6 +265,8 @@ const RecipeAuditForm = () => {
     e.preventDefault();
     e.stopPropagation();
     
+    console.log('Deselecting file:', fieldName);
+    
     setFormData(prev => ({
       ...prev,
       [fieldName]: null
@@ -298,42 +300,42 @@ const RecipeAuditForm = () => {
     }, 10);
   };
 
-  const FileInput = ({ name, label, accept = ".txt,.csv,.json,.xml,.recipe" }) => {
+  const FileInput = ({ name, label, accept = ".txt,.csv,.json,.xml,.recipe", required = false }) => {
     const hasFile = formData[name] && formData[name].name;
     
     return (
       <div className="form-group">
-        <label htmlFor={name}>{label}:</label>
-        <div className="custom-file-input-wrapper">
-          <input
-            type="file"
-            id={name}
-            name={name}
-            onChange={handleInputChange}
-            accept={accept}
-            disabled={isSubmitting}
-          />
-          <div className={`custom-file-button ${hasFile ? 'has-file' : ''} ${isSubmitting ? 'disabled' : ''}`}>
-            <span className={`file-button-text ${hasFile ? '' : 'placeholder'}`}>
-              {hasFile ? `Selected: ${formData[name].name}` : 'Choose file...'}
-            </span>
-            <div className="file-button-actions">
-              {hasFile && !isSubmitting && (
-                <button
-                  type="button"
-                  className="file-deselect-btn"
-                  onClick={(e) => handleFileDeselect(name, e)}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  title="Remove selected file"
-                >
-                  ×
-                </button>
-              )}
+        <label htmlFor={name}>{label}{required && <span className="required-asterisk"> *</span>}</label>
+        <div className="file-input-container">
+          <div className="custom-file-input-wrapper">
+            <input
+              type="file"
+              id={name}
+              name={name}
+              onChange={handleInputChange}
+              accept={accept}
+              disabled={isSubmitting}
+              required={required}
+            />
+            <div className={`custom-file-button ${hasFile ? 'has-file' : ''} ${isSubmitting ? 'disabled' : ''}`}>
+              <span className={`file-button-text ${hasFile ? '' : 'placeholder'}`}>
+                {hasFile ? `Selected: ${formData[name].name}` : 'Choose file...'}
+              </span>
               <span className="file-button-icon">
                 {hasFile ? '✓' : '📁'}
               </span>
             </div>
           </div>
+          {hasFile && !isSubmitting && (
+            <button
+              type="button"
+              className="external-deselect-btn"
+              onClick={(e) => handleFileDeselect(name, e)}
+              title="Remove selected file"
+            >
+              🗑️
+            </button>
+          )}
         </div>
       </div>
     );
@@ -341,7 +343,7 @@ const RecipeAuditForm = () => {
 
   const SelectInput = ({ name, label, options, required = false }) => (
     <div className="form-group">
-      <label htmlFor={name}>{label}:</label>
+      <label htmlFor={name}>{label}{required && <span className="required-asterisk"> *</span>}</label>
       <select
         id={name}
         name={name}
@@ -580,7 +582,7 @@ const RecipeAuditForm = () => {
         {/* Recipe Files Section */}
         <div className="form-section">
           <h3>Recipe Files</h3>
-          <FileInput name="chamberRecipeFile" label="Chamber Recipe" />
+          <FileInput name="chamberRecipeFile" label="Chamber Recipe" required={true} />
           <FileInput name="parameterFile" label="Tools Parameters" accept=".txt,.csv,.json,.xml,.params" />
           <FileInput name="lpcRecipeFile" label="LPC Recipe File" />
           <FileInput name="seasoningRecipeFile" label="Pre-Lot Recipe" />
@@ -595,12 +597,14 @@ const RecipeAuditForm = () => {
             name="escCip" 
             label="ESC CIP" 
             options={escCipOptions} 
+            required={true}
           />
 
           <SelectInput 
             name="cip" 
             label="CIP" 
             options={cipOptions} 
+            required={true}
           />
         </div>
 
