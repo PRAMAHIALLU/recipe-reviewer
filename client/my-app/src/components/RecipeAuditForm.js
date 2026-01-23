@@ -116,17 +116,63 @@ const RecipeAuditForm = () => {
       value,
       files,
       filesLength: files ? files.length : 0,
-      firstFile: files ? files[0] : null
+      firstFile: files ? files[0] : null,
+      firstFileName: files && files[0] ? files[0].name : null
     });
     
-    setFormData(prev => ({
-      ...prev,
-      [name]: files ? (files.length > 0 ? files[0] : null) : value
-    }));
+    const newValue = files ? (files.length > 0 ? files[0] : null) : value;
+    
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [name]: newValue
+      };
+      
+      // Debug the state update
+      console.log('FormData update:', {
+        fieldName: name,
+        newValue: newValue,
+        updatedFormData: updated
+      });
+      
+      return updated;
+    });
+
+    // Clear error when user makes changes to fix validation issues
+    if (error) {
+      setError(null);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Custom validation for required fields
+    const requiredFields = {
+      platform: 'Platform',
+      chamberOfInterest: 'Chamber of Interest', 
+      escCip: 'ESC CIP',
+      cip: 'CIP',
+      chamberRecipeFile: 'Chamber Recipe File'
+    };
+    
+    const missingFields = [];
+    
+    // Check required text fields
+    if (!formData.platform) missingFields.push('Platform');
+    if (!formData.chamberOfInterest) missingFields.push('Chamber of Interest');
+    if (!formData.escCip) missingFields.push('ESC CIP');
+    if (!formData.cip) missingFields.push('CIP');
+    
+    // Check required file fields
+    if (!formData.chamberRecipeFile || !(formData.chamberRecipeFile instanceof File)) {
+      missingFields.push('Chamber Recipe File');
+    }
+    
+    if (missingFields.length > 0) {
+      setError(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+      return;
+    }
     
     // Auto-scroll to top when form is submitted
     setTimeout(() => {
@@ -267,16 +313,21 @@ const RecipeAuditForm = () => {
     
     console.log('Deselecting file:', fieldName);
     
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: null
-    }));
-    
-    // Also clear the actual file input element
+    // Clear the actual file input element first
     const fileInput = document.getElementById(fieldName);
     if (fileInput) {
       fileInput.value = '';
+      console.log('Cleared file input value for:', fieldName);
     }
+    
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [fieldName]: null
+      };
+      console.log('File deselected, updated formData:', updated);
+      return updated;
+    });
   };
 
   const handleReset = () => {
@@ -301,7 +352,24 @@ const RecipeAuditForm = () => {
   };
 
   const FileInput = ({ name, label, accept = ".txt,.csv,.json,.xml,.recipe", required = false }) => {
-    const hasFile = formData[name] && formData[name].name;
+    // More robust file checking
+    const hasFile = formData[name] && 
+                   formData[name] instanceof File && 
+                   formData[name].name && 
+                   formData[name].name.trim() !== '';
+    
+    // Check if this required field is missing (for styling)
+    const isMissingRequired = required && !hasFile;
+    
+    // Debug logging for file state
+    console.log(`FileInput ${name}:`, {
+      formDataValue: formData[name],
+      hasFile: hasFile,
+      isFile: formData[name] instanceof File,
+      fileName: formData[name]?.name,
+      required: required,
+      isMissingRequired: isMissingRequired
+    });
     
     return (
       <div className="form-group">
@@ -315,9 +383,9 @@ const RecipeAuditForm = () => {
               onChange={handleInputChange}
               accept={accept}
               disabled={isSubmitting}
-              required={required}
+              // Remove required attribute - we'll handle validation manually
             />
-            <div className={`custom-file-button ${hasFile ? 'has-file' : ''} ${isSubmitting ? 'disabled' : ''}`}>
+            <div className={`custom-file-button ${hasFile ? 'has-file' : ''} ${isMissingRequired ? 'missing-required' : ''} ${isSubmitting ? 'disabled' : ''}`}>
               <span className={`file-button-text ${hasFile ? '' : 'placeholder'}`}>
                 {hasFile ? `Selected: ${formData[name].name}` : 'Choose file...'}
               </span>

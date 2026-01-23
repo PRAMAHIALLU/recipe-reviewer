@@ -181,6 +181,23 @@
   background: #f8fff9;
 }
 
+.custom-file-button.missing-required {
+  border-color: #dc3545 !important;
+  background: #fff5f5;
+  animation: missingRequired 2s ease-in-out infinite;
+}
+
+@keyframes missingRequired {
+  0%, 100% { 
+    border-color: #dc3545;
+    background: #fff5f5;
+  }
+  50% { 
+    border-color: #ff6b7a;
+    background: #ffe6e8;
+  }
+}
+
 .file-button-text {
   flex: 1;
   text-align: left;
